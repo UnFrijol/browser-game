@@ -1,0 +1,19 @@
+{
+  "name": "getting_started",
+  "version": "1.0.0",
+  "description": "Following phaser.io tutorial",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Victor Beltran-Gil",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UnFrijol/browser-game"
+  },
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
