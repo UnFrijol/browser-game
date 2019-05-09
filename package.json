@@ -1,18 +1,14 @@
 {
-  "name": "prototype",
-  "version": "0.1.0",
-  "description": "Prototype of Phaser 3 browser game",
+  "name": "game_2",
+  "version": "1.0.0",
+  "description": "Phaser 3 browser game",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "Victor Beltran-Gil",
+  "keywords": [],
+  "author": "",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/UnFrijol/browser-game"
-  },
   "dependencies": {
     "express": "^4.16.4"
   }
