@@ -1,7 +1,7 @@
 {
-  "name": "getting_started",
-  "version": "1.0.0",
-  "description": "Following phaser.io tutorial",
+  "name": "prototype",
+  "version": "0.1.0",
+  "description": "Prototype of Phaser 3 browser game",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
