@@ -2,8 +2,8 @@ let config = {
     width: 256,
     height: 272,
     backgroundColor: 0x000000,
-    scene: [Scene1, Scene2],
-    pixelArt: true,
+    scene: [MenuScene, LoadScene, PlayScene, GameOverScene],
+    pixelArt: true, // don't add antialias
     physics: {
         default: 'arcade',
         arcade: {
@@ -13,7 +13,10 @@ let config = {
 }
 
 let gameSettings = {
-    playerSpeed: 200
+    playerSpeed: 200,
+    playerHealth: 4,
+    killCount: 0,
+    score: 0
 }
 
 let game = new Phaser.Game(config);

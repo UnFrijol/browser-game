@@ -1,8 +1,9 @@
-class Scene1 extends Phaser.Scene {
+class LoadScene extends Phaser.Scene {
     constructor() {
         super('bootGame');
     }
 
+    // executed once: load all assets into the browser's memory
     preload() {
         this.load.image('background', 'assets/images/background.png');
         
@@ -33,12 +34,22 @@ class Scene1 extends Phaser.Scene {
         this.load.spritesheet('beam', 'assets/spritesheets/beam.png', {
             frameWidth: 16,
             frameHeight: 16
-        })
+        });
+
+        this.load.audio('backgroundGameMusic', 'assets/audio/background_game.mp3');
+        this.load.audio('hurt', 'assets/audio/hurt.mp3');
+        this.load.audio('lastHurt', 'assets/audio/last_hurt.mp3');
+        this.load.audio('gameOver', 'assets/audio/game_over.mp3');
+        this.load.audio('beamShot', 'assets/audio/beam_shot.mp3');
+        this.load.audio('ship1Explosion', 'assets/audio/ship1_explosion.mp3');
+        this.load.audio('ship2Explosion', 'assets/audio/ship2_explosion.mp3');
+        this.load.audio('ship3Explosion', 'assets/audio/ship3_explosion.mp3');
     }
 
+    // executed once: adds anything into the game
     create() {
         this.add.text(20, 20, 'Loading game...');
-        this.scene.start('playGame');
+        this.scene.start('gameItself');
 
         this.anims.create({
             key: 'ship1_anim',

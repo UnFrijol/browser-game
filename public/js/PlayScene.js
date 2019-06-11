@@ -1,15 +1,15 @@
-class Scene2 extends Phaser.Scene {
+class PlayScene extends Phaser.Scene {
     constructor() {
-        super('playGame');
+        super('gameItself');
     }
 
     create() {
         this.background = this.add.tileSprite(0, 0, config.width, config.height, 'background');
         this.background.setOrigin(0, 0);
 
-        this.ship1 = this.add.sprite(config.width / 2 - 50, config.height / 2, 'ship');
-        this.ship2 = this.add.sprite(config.width / 2, config.height / 2, 'ship2');
-        this.ship3 = this.add.sprite(config.width / 2 + 50, config.height / 2, 'ship3');
+        this.ship1 = this.add.sprite(config.width / 2 - 50, -20, 'ship');
+        this.ship2 = this.add.sprite(config.width / 2, -20, 'ship2');
+        this.ship3 = this.add.sprite(config.width / 2 + 50, -20, 'ship3');
 
         this.enemies = this.physics.add.group();
         this.enemies.add(this.ship1);
@@ -45,7 +45,8 @@ class Scene2 extends Phaser.Scene {
 
         this.input.on('gameobjectdown', this.destroyShip, this);
 
-        this.add.text(20, 20, 'Playing game', { font: '25px Arial', fill: 'yellow' });
+        this.add.text(20, 20, 'Destroy the enemy fleet!', { font: '15px Verdana', fill: 'yellow' });
+        this.progress = this.add.text(20, 40, '0 / 20', { font: '12px Verdana', fill: 'yellow' });
 
         this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, 'player');
         this.player.play('thrust');
@@ -61,6 +62,10 @@ class Scene2 extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
         this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, null, this);
         this.physics.add.overlap(this.projectiles, this.enemies, this.hitEnemy, null, this);
+
+        this.sound.pauseOnBlur = false;
+        this.backgroundMusic = this.sound.add('backgroundGameMusic');
+        this.backgroundMusic.play({ loop: true });
     }
 
     pickPowerUp(player, powerUp) {
@@ -69,26 +74,37 @@ class Scene2 extends Phaser.Scene {
 
     hurtPlayer(player, enemy) {
         this.resetShipPos(enemy);
+
+        (gameSettings.playerHealth === 1) ? this.sound.play('lastHurt') : this.sound.play('hurt');
         player.x = config.width / 2 - 8;
         player.y = config.height - 64;
+
+        gameSettings.playerHealth--;
     }
 
     hitEnemy(projectile, enemy) {
         projectile.destroy();
-        this.resetShipPos(enemy);
-    }
 
-    moveShip(ship, speed) {
-        ship.y += speed;
-        if (ship.y > config.height) {
-            this.resetShipPos(ship);
+        this.resetShipPos(enemy);
+        if (enemy === this.ship1) {
+            this.sound.play('ship1Explosion');
+            gameSettings.score += 30;
         }
+        else if (enemy === this.ship2) {
+            this.sound.play('ship2Explosion', { volume: 0.5 });
+            gameSettings.score += 20;
+        }
+        else if (enemy === this.ship3) {
+            this.sound.play('ship3Explosion');
+            gameSettings.score += 10;
+        }
+
+        gameSettings.killCount++;
     }
 
     resetShipPos(ship) {
         ship.y = 0;
-        let randomX = Phaser.Math.Between(0, config.width);
-        ship.x = randomX;
+        ship.x = Phaser.Math.Between(0, config.width);
     }
 
     destroyShip(pointer, gameObject) {
@@ -112,6 +128,23 @@ class Scene2 extends Phaser.Scene {
         for (let i = 0; i < this.projectiles.getChildren().length; i++) {
             let beam = this.projectiles.getChildren()[i];
             beam.update();
+        }
+
+        this.updateStats();
+
+        if (gameSettings.playerHealth === 0) {
+            this.scene.start('gameOver');
+        }
+
+        if (gameSettings.killCount === 20) {
+            this.add.text(config.width / 2, config.height / 2, 'MISSION ACCOMPLISHED');
+        }
+    }
+
+    moveShip(ship, speed) {
+        ship.y += speed;
+        if (ship.y > config.height) {
+            this.resetShipPos(ship);
         }
     }
 
@@ -138,6 +171,11 @@ class Scene2 extends Phaser.Scene {
     }
 
     shootBeam() {
-        let beam = new Beam(this);
+        new Beam(this);
+        this.sound.play('beamShot', { volume: 5 });
+    }
+
+    updateStats() {
+        this.progress.setText(`${gameSettings.killCount} / 20`);
     }
 }
