@@ -36,6 +36,7 @@ class LoadScene extends Phaser.Scene {
             frameHeight: 16
         });
 
+        // audio files for the PlayScene
         this.load.audio('backgroundGameMusic', 'assets/audio/background_game.mp3');
         this.load.audio('hurt', 'assets/audio/hurt.mp3');
         this.load.audio('lastHurt', 'assets/audio/last_hurt.mp3');

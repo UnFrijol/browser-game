@@ -39,15 +39,6 @@ class PlayScene extends Phaser.Scene {
         this.ship2.play('ship2_anim');
         this.ship3.play('ship3_anim');
 
-        this.ship1.setInteractive();
-        this.ship2.setInteractive();
-        this.ship3.setInteractive();
-
-        this.input.on('gameobjectdown', this.destroyShip, this);
-
-        this.add.text(20, 20, 'Destroy the enemy fleet!', { font: '15px Verdana', fill: 'yellow' });
-        this.progress = this.add.text(20, 40, '0 / 20', { font: '12px Verdana', fill: 'yellow' });
-
         this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, 'player');
         this.player.play('thrust');
         this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -62,6 +53,34 @@ class PlayScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
         this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, null, this);
         this.physics.add.overlap(this.projectiles, this.enemies, this.hitEnemy, null, this);
+
+        // draw black area for the stats
+        let graphics = this.add.graphics();
+        graphics.fillStyle(0x000000, 1);
+        graphics.beginPath();
+        graphics.moveTo(0, 0);
+        graphics.lineTo(config.width, 0);
+        graphics.lineTo(config.width, 20);
+        graphics.lineTo(0, 20);
+        graphics.lineTo(0, 0);
+        graphics.closePath();
+        graphics. fillPath();
+
+        // add stats
+        if (!gameSettings.endlessMode) {
+            this.progressLabel = this.add.bitmapText(10, 5, 'pixelFont', '0 / 20', 16);
+            this.scoreLabel = this.add.bitmapText(100, 5, 'pixelFont', 'SCORE 000', 16);
+        } else {
+            this.progressLabel = this.add.bitmapText(10, 5, 'pixelFont', `KILLS ${gameSettings.killCount}`, 16);
+            this.scoreLabel = this.add.bitmapText(100, 5, 'pixelFont', `SCORE ${gameSettings.score}`, 16);
+        }
+        this.healthLabel = this.add.bitmapText(205, 5, 'pixelFont', 'LIVES 4', 16);
+        setTimeout(() => {
+            this.targetLabel = this.add.bitmapText(60, 250, 'pixelFont', 'Destroy the enemy fleet!', 16);
+            setTimeout(() => {
+                this.targetLabel.destroy();
+            }, 4000);
+        }, 1000);
 
         this.sound.pauseOnBlur = false;
         this.backgroundMusic = this.sound.add('backgroundGameMusic');
@@ -80,12 +99,14 @@ class PlayScene extends Phaser.Scene {
         player.y = config.height - 64;
 
         gameSettings.playerHealth--;
+        this.healthLabel.text = `LIVES ${gameSettings.playerHealth}`;
     }
 
     hitEnemy(projectile, enemy) {
         projectile.destroy();
 
         this.resetShipPos(enemy);
+
         if (enemy === this.ship1) {
             this.sound.play('ship1Explosion');
             gameSettings.score += 30;
@@ -98,18 +119,20 @@ class PlayScene extends Phaser.Scene {
             this.sound.play('ship3Explosion');
             gameSettings.score += 10;
         }
+        let score = this.formatScore(gameSettings.score, 3);
+        this.scoreLabel.text = `SCORE ${score}`;
 
         gameSettings.killCount++;
+        if (gameSettings.killCount <= 20) {
+            this.progressLabel.text = `${gameSettings.killCount} / 20`;
+        } else if (gameSettings.endlessMode) {
+            this.progressLabel.text = `KILLS ${gameSettings.killCount}`;
+        }
     }
 
     resetShipPos(ship) {
         ship.y = 0;
         ship.x = Phaser.Math.Between(0, config.width);
-    }
-
-    destroyShip(pointer, gameObject) {
-        gameObject.setTexture('explosion');
-        gameObject.play('explode');
     }
 
     update() {
@@ -130,14 +153,14 @@ class PlayScene extends Phaser.Scene {
             beam.update();
         }
 
-        this.updateStats();
-
         if (gameSettings.playerHealth === 0) {
+            this.backgroundMusic.pause();
             this.scene.start('gameOver');
         }
 
-        if (gameSettings.killCount === 20) {
-            this.add.text(config.width / 2, config.height / 2, 'MISSION ACCOMPLISHED');
+        if (!gameSettings.endlessMode && gameSettings.killCount === 20) {
+            this.backgroundMusic.pause();
+            this.scene.start('success');
         }
     }
 
@@ -175,7 +198,12 @@ class PlayScene extends Phaser.Scene {
         this.sound.play('beamShot', { volume: 5 });
     }
 
-    updateStats() {
-        this.progress.setText(`${gameSettings.killCount} / 20`);
+    formatScore(score, padding) {
+        let scoreString = String(score);
+        while (scoreString.length < padding) {
+            scoreString = `0${scoreString}`;
+        }
+
+        return scoreString;
     }
 }
